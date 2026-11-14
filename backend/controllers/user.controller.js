@@ -2,7 +2,7 @@ const userModel=require('../models/user.model')
 
 const userService=require('../services/user.service')
 const {validationResult}=require('express-validator')
-
+const blacklistToken=require('../models/blacklistToken.model')
 
 ////// user register controller
 module.exports.registerUser=async(req,res)=>{
@@ -53,4 +53,26 @@ module.exports.loginUser=async(req,res)=>{
   }
   const token =user.generateAuthToken()
   res.status(200).json({token,user})
+}
+
+
+
+/////// get user profile controller
+module.exports.getUserProfile=async(req,res)=>{
+  res.status(200).json(req.user)
+}
+
+/////// logout user controller
+module.exports.logoutUser=async(req,res)=>{
+  // const { token } = req;
+  // await BlacklistToken.create({
+  //   token,
+  //   userId: req.user._id,
+  //   expiresAt: new Date(Date.now() + 86400000) // 24 hours
+  // });
+  // res.status(200).json({ message: 'User logged out successfully' });
+  res.clearCookie('token')
+  const token=req.cookies.token || req.headers.authorization.split(' ')[1]
+  await blacklistToken.create({token})
+  res.status(200).json({message: 'User loggedout'})
 }
